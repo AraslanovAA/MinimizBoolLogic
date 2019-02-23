@@ -37,6 +37,7 @@ def recognizeOperands(letter,Func,Sygnal,N=4):
 
 '''
 существование полных форм записей и коротких:
+внимание: операнды чувствительны к регистру
 разрешается использование следующих логических операторов:
 not	:	'-'
 or	:	'+'
@@ -45,34 +46,40 @@ xor	:	'%'
 sheff	:	'|'
 pirs	:	'/'
 imp	:	'#' наверно чуть логичнее было бы импользовать > ?'''
-#todo: в начале выполнения строку нужно разъебать на список, поискать в нём длинное говно, преобразовать к короткому говну и вернуть в стркоу, так например
-#операнд orda не пострадает
-
+#короткие имена разрешено писать слитно, имспользуя длинные имена необходимо ставить пробелы
 def vocabulary(Func):
+    ShortNames ={
+        'not': '-',
+        'or': '+',
+        'and': '*',
+        'xor': '%',
+        'sheff': '|',
+        'pirs' : '/',
+        'imp' : '#'
+    }
     LFunc =[]
     LFunc = list(Func)
+    for i in LFunc:
+        if i == '(':
+            i = ' ( '
+        if i == ')':
+            i =' ) '
+    Func = ""  # собираем строку обратно
+    for Item in LFunc:
+        Func = Func + Item
+    LFunc.clear()
+    LFunc = Func.split(' ')
     print(LFunc)
-    return 0
-    subStrOld = 'xor'#преобразовнаие xor
-    subStrNew = '%'
-    lenStrOld = len(subStrOld)
-    while Func.find(subStrOld) > 0:
-        i = Func.find(subStrOld)
-        Func = Func[:i] + subStrNew + Func[i + lenStrOld:]
+    while '' in LFunc:
+        LFunc.pop(LFunc.index(''))
+    for ItemIndex in range(len(LFunc)):#заменяем длинные имена на короткие
+        if LFunc[ItemIndex] in ShortNames:
+            LFunc[ItemIndex] = ShortNames[LFunc[ItemIndex]]
 
-    subStrOld = 'imp'#преобразовнаие импликации
-    subStrNew = '#'
-    lenStrOld = len(subStrOld)
-    while Func.find(subStrOld) > 0:
-        i = Func.find(subStrOld)
-        Func = Func[:i] + subStrNew + Func[i + lenStrOld:]
-
-    subStrOld = ' '  # удаление пробелов
-    subStrNew = ''
-    lenStrOld = len(subStrOld)
-    while Func.find(subStrOld) > 0:
-        i = Func.find(subStrOld)
-        Func = Func[:i] + subStrNew + Func[i + lenStrOld:]
+    print(LFunc)
+    Func =""#собираем строку обратно
+    for Item in LFunc:
+        Func = Func + Item
 
     letter =0
     L = len(Func)
@@ -81,15 +88,15 @@ def vocabulary(Func):
     recognized = False
     # пиздец сука говнокод нахуй switch case бы блять
     Sygnal = {
-        '-' : 1,
-        '(' : 2,
-        ')' : 3,
-        '+' : 4,
-        '*' : 5,
-        '%' : 6,#xor
-        '|' : 7,
-        '/' : 8,
-        '#' : 9#импликация
+        '-': 1,
+        '(': 2,
+        ')': 3,
+        '+': 4,
+        '*': 5,
+        '%': 6,  # xor
+        '|': 7,
+        '/': 8,
+        '#': 9  # импликация
     }
     while(letter < L):
         recognized = False
