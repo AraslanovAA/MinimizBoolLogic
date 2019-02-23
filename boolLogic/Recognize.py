@@ -12,7 +12,6 @@ def recognizeOperands(letter,Func,Sygnal,N=4):
         if (letter < len(Func)):
             if Func[letter] in Sygnal:
                 endrecognize = True#хмм
-                print("значит формируем значение")
                 flag = False
                 for k in OpNames:#если такого имени в списке нет, добавляем
                     if k == name:
@@ -21,10 +20,8 @@ def recognizeOperands(letter,Func,Sygnal,N=4):
                     OpNames.append(name)
                 return letter-1
             else:
-                print("ебашим дальше")
                 name = name + Func[letter]
         else:
-            print("тут гг, формируем значение")
             endrecognize= True
             flag = False
             for k in OpNames:  # если такого имени в списке нет, добавляем
@@ -38,14 +35,24 @@ def recognizeOperands(letter,Func,Sygnal,N=4):
         return -1
 
 
+'''
+существование полных форм записей и коротких:
+разрешается использование следующих логических операторов:
+not	:	'-'
+or	:	'+'
+and	:	'*'
+xor	:	'%'
+sheff	:	'|'
+pirs	:	'/'
+imp	:	'#' наверно чуть логичнее было бы импользовать > ?'''
+#todo: в начале выполнения строку нужно разъебать на список, поискать в нём длинное говно, преобразовать к короткому говну и вернуть в стркоу, так например
+#операнд orda не пострадает
 
 def vocabulary(Func):
-    if Func.find('#') > 0:
-        print("зарпещённный символ: " + str(Func.find('#')+1))# todo:передать сообщение на экран
-        return -1
-    if Func.find('%') > 0:
-        print("зарпещённный символ: " + str(Func.find('#') + 1))  # todo:передать сообщение на экран
-        return -1
+    LFunc =[]
+    LFunc = list(Func)
+    print(LFunc)
+    return 0
     subStrOld = 'xor'#преобразовнаие xor
     subStrNew = '%'
     lenStrOld = len(subStrOld)
@@ -87,9 +94,7 @@ def vocabulary(Func):
     while(letter < L):
         recognized = False
         if ((X == 'X0') and (recognized == False)):
-            print("обрабатываемый символ:" +Func[letter])
             recognized = True
-            print("X0")
             if Func[letter] in Sygnal:
                 if (Sygnal[Func[letter]] == 1):
                     X = 'X1'
@@ -100,13 +105,10 @@ def vocabulary(Func):
                         print('некорректное выражение, символ: ' + str(letter+1))# todo:передать сообщение на экран
                         return -1
             else:
-                print("встречен символ")#добавить сюда функцию по распознованию операндов
                 X='X3'
 
         if ((X == 'X1') and (recognized == False)):
-            print("обрабатываемый символ:" + Func[letter])
             recognized = True
-            print("X1")
             if Func[letter] in Sygnal:
                 if (Sygnal[Func[letter]] == 2):
                     X='X2'
@@ -114,12 +116,9 @@ def vocabulary(Func):
                     print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
                     return -1
             else:
-                print("встречен символ")  # добавить сюда функцию по распознованию операндов
                 X='X3'
         if ((X == 'X2') and (recognized == False)):
-            print("обрабатываемый символ:" + Func[letter])
             recognized = True
-            print("X2")
             if Func[letter] in Sygnal:
                 if (Sygnal[Func[letter]] == 1):
                     X='X1'
@@ -130,12 +129,9 @@ def vocabulary(Func):
                         print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
                         return -1
             else:
-                print("встречен символ")  # добавить сюда функцию по распознованию операндов
                 X='X3'
         if ((X == 'X3') and (recognized == False)):
-            print("обрабатываемый символ:" + Func[letter])
             recognized = True
-            print("X3")
             if Func[letter] in Sygnal:
                 if (Sygnal[Func[letter]] == 3):
                     X = 'X5'
@@ -146,12 +142,9 @@ def vocabulary(Func):
                         print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
                         return -1
             else:
-                print("встречен символ")  # добавить сюда функцию по распознованию операндов
                 X='X3'
         if ((X == 'X4') and (recognized == False)):
-            print("обрабатываемый символ:" + Func[letter])
             recognized = True
-            print("X4")
             if Func[letter] in Sygnal:
                 if (Sygnal[Func[letter]] == 1):
                     X='X1'
@@ -162,15 +155,12 @@ def vocabulary(Func):
                         print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
                         return -1
             else:
-                print("встречен символ")  # добавить сюда функцию по распознованию операндов
                 X='X3'
         if ((X == 'X5') and (recognized == False)):
-            print("обрабатываемый символ:" + Func[letter])
             if(openskobka <0):
                 print("Обработка ошибки: перевес закрывающих скобок символ: " +str(letter+1))# todo:передать сообщение на экран
                 return -1
             recognized = True
-            print("X5")
             if Func[letter] in Sygnal:
                 if (Sygnal[Func[letter]] == 3):
                     X= 'X5'
