@@ -60,7 +60,9 @@ class Truths(object):
             return row
 
     def __str__(self):
-        t = PrettyTable(self.base + self.phrases)
+       # t = PrettyTable(self.base + self.phrases)
+        t=[]
         for conditions_set in self.base_conditions:
-            t.add_row(self.calculate(*conditions_set))
+           # t.add_row(self.calculate(*conditions_set))
+            t.append(self.calculate(*conditions_set))
         return str(t)

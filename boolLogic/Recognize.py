@@ -1,5 +1,4 @@
-#todo: прежде чем отдавать параметры на создание таблицы истинности, создать новый список без 0 и 1 либо обработать 0 и 1 уже в дургом классе
-from truths import Truths
+﻿from truths import Truths
 global OpNames#список с именами параметров
 OpNames = []
 def recognizeOperands(letter,Func,Sygnal,N=4):
@@ -35,21 +34,11 @@ def recognizeOperands(letter,Func,Sygnal,N=4):
         print("превышено допустимое количесвто символов в имени параметра: " + str(letter+1-i))# todo:передать сообщение на экран
         return -1
 
-
-'''
-существование полных форм записей и коротких:
-внимание: операнды чувствительны к регистру
-разрешается использование следующих логических операторов:
-not	:	'-'
-or	:	'+'
-and	:	'*'
-xor	:	'%'
-sheff	:	'|'
-pirs	:	'/'
-imp	:	'#' наверно чуть логичнее было бы импользовать > ?'''
-#короткие имена разрешено писать слитно, имспользуя длинные имена необходимо ставить пробелы
 def vocabulary(Func):
-    global ShortNames
+    '''существование полных форм записей и коротких:
+    короткие имена разрешено писать слитно, имспользуя длинные имена необходимо ставить пробелы
+    внимание: операнды чувствительны к регистру
+    разрешается использование следующих логических операторов:'''
     ShortNames ={
         'not': '-',
         'or': '+',
@@ -57,7 +46,7 @@ def vocabulary(Func):
         'xor': '%',
         'sheff': '|',
         'pirs' : '/',
-        'imp' : '#'
+        'imp' : '#' #наверно чуть логичнее было бы импользовать > ?
     }
     LFunc =[]
     LFunc = list(Func)
@@ -187,11 +176,21 @@ def vocabulary(Func):
             openskobka -=1
 
         if (X=='X3'):
-            letter = recognizeOperands(letter,Func,Sygnal)
-            if letter == -1:
-                return -1
+            if Func[letter].isdigit():
+                if Func[letter] == '0' or Func[letter] == '1':#если 0 или 1 используется в качестве операнда
+                    print("встречени 0/1")
+                else:
+                    print("Обработка ошибки операн не может начинаться с 0/1")#todo: ошибка названия операнда начиная с цифры выдать на экран
+            else:
+                letter = recognizeOperands(letter,Func,Sygnal)
+                if letter == -1:
+                    return -1
         letter += 1
 
+    if ((X!='X0') and (X !='X3') and (X!='X5')):
+        print(X)
+        print("обработка ошибки: функция недописана")#todo:передать на экран
+        return -1
     if (openskobka < 0):
         print("Обработка ошибки: перевес закрывающих скобок символ: " + str(letter + 1))# todo:передать сообщение на экран
         return -1
@@ -199,10 +198,8 @@ def vocabulary(Func):
         print("Обработка ошибки: перевес открывающих скобок в выражении")# todo:передать сообщение на экран
         return -1
     print("Твоя функция записана верно")
-    #print(Func)
-    #print(OpNames)
-    transform(Func)
-    print(Truths(OpNames,[transform(Func)]))
+    return str(Truths(OpNames,[transform(Func, Sygnal)]))
+
 
 def SearcArgs(Func, i,Sygnal):
     '''функция на вход принимает строку функции и индекс логического выражения
@@ -281,20 +278,9 @@ def substitution(Func):
     return Func
 
 
-def transform(Func):
+def transform(Func, Sygnal):
     '''функция получает на вход проверенную функцию, преобразует все логические выражения в базис и или не, затем
     вызывает функцию substitution  и после должна передать получившееся выражение для создания таблицы истинности'''
-    Sygnal = {
-        '-': 1,
-        '(': 2,
-        ')': 3,
-        '*': 4,
-        '+': 5,
-        '%': 6,  # xor
-        '|': 7,
-        '/': 8,
-        '#': 9  # импликация
-        }
     argsindex =[]
     LeftArg =""
     RightArg=""
@@ -336,6 +322,3 @@ def transform(Func):
                         Func = Func[:argsindex[0]] + '(-' + LeftArg + '+' + RightArg + ')' + Func[(argsindex[3] + 1):]
                         moved = False
     return substitution(Func)
-
-
-vocabulary(input())
