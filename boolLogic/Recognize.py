@@ -18,7 +18,7 @@ def recognizeOperands(letter,Func,Sygnal,N=4):
                         flag = True
                 if flag == False:
                     OpNames.append(name)
-                return letter-1
+                return [0,letter-1]
             else:
                 name = name + Func[letter]
         else:
@@ -29,12 +29,16 @@ def recognizeOperands(letter,Func,Sygnal,N=4):
                     flag = True
             if flag == False:
                 OpNames.append(name)
-            return letter - 1#тут конец обработки функции в принципе
+            return [0,letter - 1]#тут конец обработки функции в принципе
     if (i == N):
-        print("превышено допустимое количесвто символов в имени параметра: " + str(letter+1-i))# todo:передать сообщение на экран
-        return -1
+        return [-1,"превышено допустимое количесвто символов в имени параметра: " + str(letter+1-i)]
 
-def vocabulary(Func):
+def vocabulary(Func, task):
+    for i in Func:
+        if i == "\\":
+            return [-1,"\?"]
+    global OpNames
+    OpNames.clear()
     '''существование полных форм записей и коротких:
     короткие имена разрешено писать слитно, имспользуя длинные имена необходимо ставить пробелы
     внимание: операнды чувствительны к регистру
@@ -43,10 +47,10 @@ def vocabulary(Func):
         'not': '-',
         'or': '+',
         'and': '*',
-        'xor': '%',
+        'xor': '^',
         'sheff': '|',
         'pirs' : '/',
-        'imp' : '#' #наверно чуть логичнее было бы импользовать > ?
+        'imp' : '>' #наверно чуть логичнее было бы импользовать > ?
     }
     LFunc =[]
     LFunc = list(Func)
@@ -82,10 +86,10 @@ def vocabulary(Func):
         ')': 3,
         '*': 4,
         '+': 5,
-        '%': 6,  # xor
+        '^': 6,  # xor
         '|': 7,
         '/': 8,
-        '#': 9  # импликация
+        '>': 9  # импликация
     }
     while(letter < L):
         recognized = False
@@ -98,8 +102,7 @@ def vocabulary(Func):
                     if(Sygnal[Func[letter]] == 2):
                         X = 'X2'
                     else:
-                        print('некорректное выражение, символ: ' + str(letter+1))# todo:передать сообщение на экран
-                        return -1
+                        return [-1,'некорректное выражение, символ: ' + str(letter+1)]
             else:
                 X='X3'
 
@@ -109,8 +112,7 @@ def vocabulary(Func):
                 if (Sygnal[Func[letter]] == 2):
                     X='X2'
                 else:
-                    print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
-                    return -1
+                    return [-1,'некорректное выражение, символ: ' + str(letter + 1)]
             else:
                 X='X3'
         if ((X == 'X2') and (recognized == False)):
@@ -122,8 +124,7 @@ def vocabulary(Func):
                     if (Sygnal[Func[letter]] == 2):
                         X = 'X2'
                     else:
-                        print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
-                        return -1
+                        return [-1,'некорректное выражение, символ: ' + str(letter + 1)]
             else:
                 X='X3'
         if ((X == 'X3') and (recognized == False)):
@@ -135,8 +136,7 @@ def vocabulary(Func):
                     if (Sygnal[Func[letter]] >=4):
                         X='X4'
                     else:
-                        print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
-                        return -1
+                        return [-1,'некорректное выражение, символ: ' + str(letter + 1)]
             else:
                 X='X3'
         if ((X == 'X4') and (recognized == False)):
@@ -148,14 +148,12 @@ def vocabulary(Func):
                     if (Sygnal[Func[letter]] == 2):
                         X='X2'
                     else:
-                        print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
-                        return -1
+                        return [-1,'некорректное выражение, символ: ' + str(letter + 1)]
             else:
                 X='X3'
         if ((X == 'X5') and (recognized == False)):
             if(openskobka <0):
-                print("Обработка ошибки: перевес закрывающих скобок символ: " +str(letter+1))# todo:передать сообщение на экран
-                return -1
+                return [-1,"Обработка ошибки: перевес закрывающих скобок символ: " +str(letter+1)]
             recognized = True
             if Func[letter] in Sygnal:
                 if (Sygnal[Func[letter]] == 3):
@@ -164,11 +162,9 @@ def vocabulary(Func):
                     if (Sygnal[Func[letter]] >=4):
                         X='X4'
                     else:
-                        print('некорректное выражение, символ: ' + str(letter + 1))# todo:передать сообщение на экран
-                        return -1
+                        return [-1,'некорректное выражение, символ: ' + str(letter + 1)]
             else:
-                print("Ошибка! заркывающая скобка - операнд")# todo:передать сообщение на экран
-                return -1
+                return [-1,"Ошибка! заркывающая скобка - операнд"]
 
         if(X=='X2'):#счётчик скобок
             openskobka+=1
@@ -178,27 +174,70 @@ def vocabulary(Func):
         if (X=='X3'):
             if Func[letter].isdigit():
                 if Func[letter] == '0' or Func[letter] == '1':#если 0 или 1 используется в качестве операнда
-                    print("встречени 0/1")
+                    c = 0
+                    #print("встречени 0/1")
                 else:
-                    print("Обработка ошибки операн не может начинаться с 0/1")#todo: ошибка названия операнда начиная с цифры выдать на экран
+                    return [-1,"Обработка ошибки операн не может начинаться с 0/1"]
             else:
                 letter = recognizeOperands(letter,Func,Sygnal)
-                if letter == -1:
-                    return -1
+                if letter[0] == -1:
+                    return [-1,letter[1]]
+                else:
+                    letter = letter[1]
         letter += 1
 
-    if ((X!='X0') and (X !='X3') and (X!='X5')):
-        print(X)
-        print("обработка ошибки: функция недописана")#todo:передать на экран
-        return -1
+    if ((X !='X3') and (X!='X5')):
+        return [-1,"обработка ошибки: функция недописана"]
     if (openskobka < 0):
-        print("Обработка ошибки: перевес закрывающих скобок символ: " + str(letter + 1))# todo:передать сообщение на экран
-        return -1
+        return [-1,"Обработка ошибки: перевес закрывающих скобок символ: " + str(letter + 1)]
     if openskobka != 0:
-        print("Обработка ошибки: перевес открывающих скобок в выражении")# todo:передать сообщение на экран
-        return -1
-    print("Твоя функция записана верно")
-    return str(Truths(OpNames,[transform(Func, Sygnal)]))
+        return [-1,"Обработка ошибки: перевес открывающих скобок в выражении"]
+   # print("Твоя функция записана верно")
+    if (task == "task1"):
+        paramNames = ['A','B','C','D']
+    if(task == "task2"):
+        paramNames = ['A', 'B', 'C']
+    if(task == "1"):
+        paramNames = ['N2']
+    if(task == "2"):
+        paramNames = ['N1']
+    if(task == "3"):
+        paramNames = ['N1', 'N2']
+    if(task == "4"):
+        paramNames = ['N0']
+    if(task == "5"):
+        paramNames = ['N0','N2']
+    if(task == "6"):
+        paramNames = ['N0','N1']
+    if(task == "7"):
+        paramNames = ['N0','N1','N2']
+    if(OpNames.__len__() != paramNames.__len__()):
+        return [-1,"Ошибка количества операндов"]
+    for i in paramNames:
+        if((i in OpNames) == False):
+            return [-1,"Встречены не заявленные операнды"]
+    if(task == "task1"):
+        OpNames = ['A','B','C','D']#чтобы порядок следования операндов не сломался
+    if(task == "task2"):
+        OpNames = ['A', 'B', 'C']
+    if(task == "1"):
+        OpNames = ['N2']
+    if(task == "2"):
+        OpNames = ['N1']
+    if(task == "3"):
+        OpNames = ['N1','N2']
+    if(task == "4"):
+        OpNames = ['N0']
+    if(task == "5"):
+        OpNames = ['N0','N2']
+    if(task == "6"):
+        OpNames = ['N0','N1']
+    if(task == "7"):
+        OpNames = ['N0','N1','N2']
+    OpNames.append(str(Truths(OpNames, [transform(Func, Sygnal)])))
+    return OpNames
+    #return str(Truths(OpNames,[transform(Func, Sygnal)]))
+
 
 
 def SearcArgs(Func, i,Sygnal):
@@ -322,3 +361,5 @@ def transform(Func, Sygnal):
                         Func = Func[:argsindex[0]] + '(-' + LeftArg + '+' + RightArg + ')' + Func[(argsindex[3] + 1):]
                         moved = False
     return substitution(Func)
+
+#print(vocabulary(""))

@@ -16,7 +16,6 @@
 #
 
 import itertools
-from prettytable import PrettyTable
 import re
 
 
@@ -50,10 +49,11 @@ class Truths(object):
 
         for item in self.phrases:
             item = self.p.sub(r'g.\1', item)
-            eval_phrases.append(eval(item))#todo: весь смысл в функции eval, чтобы расширить функционал нужно расширить её код видимо
+            eval_phrases.append(eval(item))
             #после выполнения в списке g.имя переменной в функции вмест оимени переменной
         # add the bases and evaluated phrases to create a single row
         row = [getattr(g, b) for b in self.base] + eval_phrases
+        #row =  eval_phrases потестить
         if self.ints:
             return [int(c) for c in row]
         else:

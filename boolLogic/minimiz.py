@@ -1,6 +1,5 @@
 import Recognize
-#берём на вход список с таблицей истинности
-import truthTable
+import pars
 
 
 def CreateSDNF(TruthTable1):
@@ -21,7 +20,6 @@ def CreateSDNF(TruthTable1):
         row = []
     #в row храним обработанной каждую строку, добавляем в SDNF, N символизиурет имя
     #сами имена хранятся в TruthTable1[0][0:len-2]
-    print(SDNF)
     return SDNF #[[*]+[*]]
 
 #берём на вход список с таблицей истинности
@@ -42,7 +40,6 @@ def CreateSKNF(TruthTable1):
         SKNF.append(row)
         row = []
     #в row храним обработанной каждую строку, добавляем в SDNF, N символизиурет имя
-    print(SKNF)
     return SKNF #[[+]*[+]]
 
 
@@ -85,7 +82,7 @@ def BinaryView(n, numparams):#numparams обепечивает постоянн�
 
 def ShowAllPermutations(SNF):
     '''по итогу функция найдёт все повторения и обхединит всё в список списков, где первый список - повторения второй номера строк с повторениями'''
-    maxparams = SNF[0].__len__()
+    maxparams = SNF[0].__len__()#todo:в теории SNF мб равен []
     #необходимо сделать все возможные выборки от 1 до maxparams-1
     AllPermut = []
     #зациклить это для каждого списка
@@ -145,7 +142,7 @@ def ShowAllPermutations(SNF):
             #перебрали все списки и если возможно, то AllPermut схлопнется
 
             ModernPermut.append([AllPermut[i][0],lists])
-    if(AllPermut[AllPermut.__len__()-1][0] != []):
+    if(AllPermut[AllPermut.__len__()-1][0] != []):#todo:по идее может не существовать и 0 элемента
         ModernPermut.append(AllPermut[AllPermut.__len__()-1])
 
     return ModernPermut
@@ -176,11 +173,17 @@ def CheckForMinimiz(SNF, dis):
             sendfunc +="( 1 "
             for each in listdeletparams:
                 if ((each[0] == prev ) or (firststep == True)):#если из 1 списка, то умножение
-                    sendfunc += " and ( " + SNF[each[0]][each[1]] +" )"
+                    if(SNF[each[0]][each[1]]!='none'):
+                        sendfunc += " and ( " + SNF[each[0]][each[1]] +" )"
+                    else:
+                        sendfunc += " and ( " + "1" + " )"
                     flag2 = True
                     firststep = False
                 else:
-                    sendfunc += ") or ( ( " + SNF[each[0]][each[1]] + " ) "
+                    if (SNF[each[0]][each[1]] != 'none'):
+                        sendfunc += ") or ( ( " + SNF[each[0]][each[1]] + " ) "
+                    else:
+                        sendfunc += ") or ( ( " + "0" + " ) "
                     flag2 = False
                 prev = each[0]
             if (flag2 == True):
@@ -195,33 +198,55 @@ def CheckForMinimiz(SNF, dis):
             flag1 = False
             for each in listdeletparams:
                 if ((each[0] == prev) or (firststep == True)):  # если из 1 списка, то умножение
-                    sendfunc += " or ( " + SNF[each[0]][each[1]] +" )"
+                    if (SNF[each[0]][each[1]] != 'none'):
+                        sendfunc += " or ( " + SNF[each[0]][each[1]] +" )"
+                    else:
+                        sendfunc += " or ( " + "0" + " )"
                     flag1 = True
                 else:
-                    sendfunc += ") and ( (" + SNF[each[0]][each[1]] +" )"
+                    if (SNF[each[0]][each[1]] != 'none'):
+                        sendfunc += ") and ( (" + SNF[each[0]][each[1]] +" )"
+                    else:
+                        sendfunc += ") and ( (" + "1" + " )"
                 prev = each[0]
             if(flag1 == True):
                 sendfunc += ")"
             else:
                 sendfunc += " )"
 
-
-        TableForCheck = truthTable.Recognizer(sendfunc)
-        #3. првоеряем эквивалентна ли замена
-        flagEcviv = True
-        for everylist in range(TableForCheck.__len__()):
-            A = TableForCheck[everylist].pop()
-            if(dis == True):
-                if (A == "0"):
-                    flagEcviv = False
-            else:
-                if(A == "1"):
-                    flagEcviv = False
-        if(flagEcviv == True):
-            ResultList.append(i)#добавление всех вариантов удаления
+        import pars
+        UsedN = [0,0,0]
+        if(sendfunc.find('N0')>0):
+            UsedN[0] = 1
+        if (sendfunc.find('N1') > 0):
+            UsedN[1] = 1
+        if (sendfunc.find('N2') > 0):
+            UsedN[2] = 1
+        shifrator = 4*UsedN[0] + 2*UsedN[1] + UsedN[2]
+        izbavlyaemsyaOtNone = True
+        if(shifrator == 0):
+            izbavlyaemsyaOtNone = False
+        if(izbavlyaemsyaOtNone == True):
+            TableForCheck = pars.Recognizer(sendfunc,str(shifrator))
+            #3. првоеряем эквивалентна ли замена
+            flagEcviv = True
+            for everylist in range(TableForCheck.__len__()):
+                A = TableForCheck[everylist].pop()
+                if(dis == True):
+                    if (A == "0"):
+                        flagEcviv = False
+                else:
+                    if(A == "1"):
+                        flagEcviv = False
+            if(flagEcviv == True):
+                ResultList.append(i)#добавление всех вариантов удаления
+        else:
+            #ResultList.append(i)
+            temp=0
     return ResultList
 
 def MinimizationSNF(SNF,dis):
+    '''говно внутри'''#todo: единственная ошибка скрывается там
     Varieties = []
     Varieties = CheckForMinimiz(SNF,dis)
     FullResult = []
@@ -243,7 +268,7 @@ def MinimizationSNF(SNF,dis):
                             flag = True#как раз то имя которое мы не трогаем
                     if flag == False:
                         result[num][numname] = "none"
-            print(i)
+
             FullResult.append(result)
     else:
         return SNF
@@ -254,10 +279,136 @@ def MinimizationSNF(SNF,dis):
             FullResult[testforminimiz] = MinimizationSNF(FullResult[testforminimiz],dis)
     return FullResult
 
-Table = [[0,0,0,1],[1,0,1,1],[1,0,0,1]]
-print(MinimizationSNF(CreateSDNF(Table), True))
+
+global ParsedJaggedArr
+ParsedJaggedArr = []
+def RecParsReclist(res):
+    '''рекурсивно парсит jagged arr в список постоянной глубины'''
+    global ParsedJaggedArr
+    A = 1
+    for i in range(res.__len__()):
+        if( isinstance(res[i], list)):
+            A = RecParsReclist(res[i])
+        else:
+            return -2
+    if A == -2:
+        temp =0
+        #вот тут мы понимаем, что нашли то самое место где нада парсить, в коце видимо нао вернут ьвсё чт оугодно, только не -2
+        ParsedJaggedArr.append(res)
+    return 0
+def SecondStepMinimiz(res):
+    '''возвращает функции без повторяющихся операций'''
+    global ParsedJaggedArr
+    RecParsReclist(res)
+    for i in range(ParsedJaggedArr.__len__()):
+        newList = []
+        newList.append(ParsedJaggedArr[i][0])
+        for j in range(ParsedJaggedArr[i].__len__()):
+            flag = False
+            for k in range(newList.__len__()):
+                if ((newList[k][0] == ParsedJaggedArr[i][j][0]) and (newList[k][1] == ParsedJaggedArr[i][j][1]) and (
+                        newList[k][2] == ParsedJaggedArr[i][j][2])):
+                    flag = True
+            if flag == False:
+                newList.append(ParsedJaggedArr[i][j])
+        ParsedJaggedArr[i] = newList
+    return ParsedJaggedArr
+def ThirdStepOfMinimiz(secondMin):
+    '''подсчитываем количество входов'''
+
+    for i in secondMin:
+        notOp = [0, 0, 0]
+        for j in i:
+            for k in j:
+                if k == "not N0":
+                    notOp[0]=1
+                if k == "not N1":
+                    notOp[1] = 1
+                if k == "not N2":
+                    notOp[2] = 1
+        #посчитали какие отрицания у нас имеются соответственно их входы считаем единожды
+        CT = 0
+        for j in i :
+            noneNum = 0
+            for el in j:
+                if el == 'none':
+                    noneNum+=1
+            if noneNum == 0:
+                CT+=4
+            if noneNum == 1:
+                CT+=2
+        CT += 2*(i.__len__() -1)
+        for eachM in notOp:
+            if eachM == 1:
+                CT+=1
+        i.append(CT)
+    return secondMin
+
+def CheckTrTable(Table, secMin,dis):
+    correctList = []
+    if (dis == True):
+        for  i in secMin:
+            UsedN = [0, 0, 0]
+            func = ""
+            for listsk in i:
+                func +="( "
+                for oper in listsk:
+                    if oper != 'none':
+                        func+=oper + " * "
+                func += " 1 ) + "
+            func = func[:-2]
+            if (func.find('N0') > 0):
+                UsedN[0] = 1
+            if (func.find('N1') > 0):
+                UsedN[1] = 1
+            if (func.find('N2') > 0):
+                UsedN[2] = 1
+            shifrator = 4 * UsedN[0] + 2 * UsedN[1] + UsedN[2]
+            retTable = pars.Recognizer(func, str(shifrator))
+            flag = True
+            for row in Table:
+                combination = ""
+                CT = 0
+                if UsedN[0] == 1:
+                    combination +=str(row[0])
+                if UsedN[1] == 1:
+                    combination+=str(row[1])
+                if UsedN[2] == 1:
+                    combination+=str(row[2])
+                for retRows in retTable:
+                    checkcomb = ""
+                    last = ""
+                    for el in retRows:
+                        checkcomb += el
+                    last = checkcomb[-1:]
+                    checkcomb = checkcomb[:-1]
+
+                    if(checkcomb == combination):
+                        if (row[3] != int(last)):
+                            flag = False
+            if flag == True:
+                correctList.append(i)
+    return correctList
+def TakeMinANDORNOT(Table):
+    res = MinimizationSNF(CreateSDNF(Table), True)#todo: добавить выбор сднф скнф
+    secodMinimiz = SecondStepMinimiz(res)
+    secodMinimiz = CheckTrTable(Table,secodMinimiz,True)
+    thirdMinimiz = ThirdStepOfMinimiz(secodMinimiz)
+    minimum = thirdMinimiz[0][-1]
+    for i in thirdMinimiz:
+        if(i[-1] < minimum):
+            minimum = i[-1]
+    print("SNF RES:")
+    for i in thirdMinimiz:
+        if i[-1] == minimum:
+            print(i)
+    return minimum
 
 
+#Table = [[0,0,0,1],[0,0,1,1],[0,1,0,0],[0,1,1,1],[1,0,0,1],[1,0,1,1],[1,1,0,0],[1,1,1,0]]#прмиер для эквивалентности
+#Table = [[0,0,0,0],[0,0,1,0],[0,1,0,0],[0,1,1,0],[1,0,0,0],[1,0,1,1],[1,1,0,1],[1,1,1,1]]
+#Table = [[0,0,0,0],[0,0,1,0],[0,1,0,0],[0,1,1,1],[1,0,0,0],[1,0,1,1],[1,1,0,1],[1,1,1,1]]
+#TakeMinANDORNOT(Table)
 
 
 
